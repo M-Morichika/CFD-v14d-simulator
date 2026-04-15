@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>CFD v14d Simulator</title>
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌋</text></svg>">
+    <style>
+        body {
+            margin: 0;
+            background: #1a1a24;
+            color: #eee;
+            font-family: sans-serif;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 300px 350px;
+            gap: 20px;
+            padding: 20px;
+            height: 100vh;
+            box-sizing: border-box;
+        }
+
+        .panel {
+            background: #252530;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+            overflow-y: auto;
+        }
+
+        canvas {
+            background: #000;
+            border: 1px solid #444;
+            border-radius: 4px;
+            width: 100%;
+        }
+
+        .controls label {
+            display: flex;
+            justify-content: space-between;
+            margin: 10px 0 5px;
+            font-size: 0.9em;
+            color: #aaa;
+        }
+
+        .controls input[type="range"] {
+            width: 100%;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 15px;
+            background: #4a90e2;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        button:hover {
+            background: #357abd;
+        }
+
+        button#btnPerturb {
+            background: #e24a4a;
+        }
+        
+        button#btnPerturb:hover {
+            background: #bd3535;
+        }
+        
+        button#btnPerturb:active {
+            background: #992929;
+            transform: scale(0.98);
+        }
+
+        .stats {
+            margin-top: 15px;
+            font-family: monospace;
+            font-size: 0.9em;
+            color: #00ffcc;
+            background: #111;
+            padding: 10px;
+            border-radius: 4px;
+            border: 1px solid #333;
+        }
+
+        h2, h3 {
+            margin-top: 0;
+            color: #ddd;
+            border-bottom: 1px solid #444;
+            padding-bottom: 5px;
+        }
+
+        .eq-box {
+            background: #111;
+            padding: 10px;
+            margin-bottom: 15px;
+            border-left: 4px solid #4a90e2;
+            font-size: 0.85em;
+        }
+
+        .eq-ref {
+            display: inline-block;
+            background: #4a90e2;
+            color: #fff;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 0.8em;
+            margin-right: 8px;
+            margin-bottom: 5px;
+        }
+
+        /* MathJaxが読み込まれるまでのチラつき防止 */
+        .MathJax {
+            font-size: 1.1em !important;
+        }
+    </style>
+
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true
+            },
+            options: {
+                skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+
+<body>
+    <div class="container">
+        <div class="panel">
+            <h2>Information Density Field $\rho(\beta, t)$</h2>
+            <canvas id="heatCanvas" width="600" height="600" style="image-rendering: pixelated;"></canvas>
+            <div class="stats" id="rhoDisplay">Max ρ: 0.000 | M: 0.000 | G: 0.000 | γ: 1.000</div>
+            <div class="stats" id="coordDisplay" style="color:#ffcc00; margin-top:5px;">Focus (none)</div>
+        </div>
+
+        <div class="panel">
+            <h2>Dynamic Hysteresis</h2>
+            <button id="btnPerturb">Apply Perturbation (Hold: $k_{drug} > 0$)</button>
+
+            <h3 style="margin-top: 15px;">Order Parameters</h3>
+            <canvas id="chartCanvas" width="300" height="150"></canvas>
+            <div style="font-size: 0.8em; color:#aaa; margin-top: 5px; text-align: center;">
+                <span style="color:rgba(255, 99, 132, 1)">$\pi_{int}$ (Metabolism)</span> |
+                <span style="color:rgba(74, 144, 226, 1)">$M$ (Total Info)</span>
+            </div>
+            
+            <div class="stats" style="color: #ff5555; text-align: center;">
+                Current $\pi_{int}$: <span id="pi_val">2.000</span>
+            </div>
+
+            <h3 style="margin-top: 15px;">Phase Portrait ($\pi_{int}$ vs $M$)</h3>
+            <canvas id="loopCanvas" width="300" height="200"></canvas>
+            <div style="font-size: 0.8em; color:#aaa; margin-top: 5px; text-align: center;">
+                x-axis: $\pi_{int}$ | y-axis: $M$
+            </div>
+
+            <div class="controls" style="margin-top: 20px;">
+                <button id="btnRun">Pause / Resume</button>
+                <button id="btnReset" style="background: #666;">Reset State</button>
+            </div>
+        </div>
+
+        <div class="panel">
+            <h2>Governing Equations (CFD v14d)</h2>
+
+            <div class="eq-box">
+                <span class="eq-ref">Eq.(1)</span>
+                <strong>① Evolution of density field $\rho$</strong><br>
+                $$ \frac{\partial \rho}{\partial t} = -\nabla\cdot(\rho\mathbf{v}) + D_{mask}\nabla^2\rho + (\pi_{int}-\lambda_0)\rho - \kappa\rho^2 $$
+            </div>
+
+            <div class="eq-box" style="border-left-color: #ff5555;">
+                <span class="eq-ref" style="background: #ff5555;">Eq.(7)(8)</span>
+                <strong>② Dynamics of Internal Metabolism $\pi_{int}$</strong><br>
+                $$ \frac{d\pi_{int}}{dt} = -k_{drug}(\pi_{int} - \pi_{tgt}) + k_{rec}(\pi_{base} - \pi_{int}) + k_{fb}M $$
+            </div>
+
+            <div class="eq-box">
+                <span class="eq-ref">Eq.(2)</span>
+                <strong>③ Markov Blanket Flux (at $r=1$)</strong><br>
+                $$ -\mathbf{n}\cdot\left(\rho\mathbf{v} - D_{mask}\nabla\rho\right) = \pi_{ext}\cdot I(\theta,t) - \pi_{act} R \rho $$
+            </div>
+
+            <div class="eq-box">
+                <span class="eq-ref">Eq.(3)(4)</span>
+                <strong>④ Flow velocity &amp; defensive viscosity</strong><br>
+                $$ \mathbf{v} = -\frac{B}{\gamma(G)}\nabla F, \quad \gamma(G) = \gamma_{min} + \frac{\gamma_{max}-\gamma_{min}}{1+e^{-a(G-G_{th})}} $$
+            </div>
+            
+            <div class="eq-box">
+                <span class="eq-ref">Eq.(5)</span>
+                <strong>⑤ Transformation resistance</strong><br>
+                $$ G[\rho,F] = k_G \int_0^{2\pi}\int_0^1 \rho F r dr d\theta $$
+            </div>
+
+            <div class="eq-box">
+                <span class="eq-ref">Eq.(6)</span>
+                <strong>⑥ Dynamic Potential F (Erosion)</strong><br>
+                $$ \frac{\tau_{base} R / (r+r_0)}{1+\rho/\rho_0} \frac{\partial F}{\partial t} = -(F-F_0) - \int W \rho \, d\beta' $$
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="./sim/app.js"></script>
+</body>
+</html>
