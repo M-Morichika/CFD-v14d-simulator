@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>CFD v14d Simulator</title>
+    <title>CFD v14d Simulator – Nonlinear PDE with Hysteresis</title>
     <link rel="icon"
         href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌋</text></svg>">
     <style>
@@ -138,6 +138,25 @@
 </head>
 
 <body>
+    <div style="padding:20px 20px 0 20px;">
+        <h1 style="margin:0; font-size:1.6em; color:#fff;">
+            CFD v14d Simulator
+        </h1>
+        <p style="margin:5px 0 15px 0; color:#aaa;">
+            A nonlinear PDE system that naturally generates hysteresis and delayed recovery via state-dependent feedback.
+        </p>
+    </div>
+
+    <div style="padding:0 20px 10px 20px; color:#bbb; font-size:0.95em;">
+        <strong>What to observe:</strong><br>
+        • Asymmetric transitions (hysteresis)<br>
+        • Delayed recovery after collapse<br>
+        • Phase-transition-like behavior<br><br>
+
+        These emerge from a closed loop:<br>
+        <code>M → π_int → ρ → M</code>
+    </div>
+
     <div class="container">
         <div class="panel">
             <h2>Information Density Field $\rho(\beta, t)$</h2>
@@ -148,6 +167,12 @@
 
         <div class="panel">
             <h2>Dynamic Hysteresis</h2>
+            
+            <div style="font-size:0.85em; color:#aaa; margin-bottom:10px;">
+                Collapse of M leads to loss of internal structure.  
+                Recovery is delayed because feedback disappears.
+            </div>
+
             <button id="btnPerturb">Apply Perturbation (Hold: $k_{drug} > 0$)</button>
 
             <h3 style="margin-top: 15px;">Order Parameters</h3>
