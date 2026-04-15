@@ -3,7 +3,7 @@
 Browser-based numerical simulator for **Cognitive Field Dynamics (CFD) v14d** — a nonlinear, non-autonomous PDE system with state-dependent feedback that generates hysteresis and phase-transition-like behavior.
 
 ## 🚀 Live Demo
-[*(ここにGitHub PagesのURLを記載してください / Insert your GitHub Pages URL here)*](https://m-morichika.github.io/CFD-v14d-simulator/)
+[CFD-v14d-simulator](https://m-morichika.github.io/CFD-v14d-simulator/)
 
 ## What's new in v14d (The Ontological Turn)
 
