@@ -12,6 +12,36 @@
             background: #1a1a24;
             color: #eee;
             font-family: sans-serif;
+            padding-bottom: 20px;
+        }
+
+        .hero {
+            padding: 20px 20px 0 20px;
+        }
+
+        .hero h1 {
+            margin: 0;
+            font-size: 1.6em;
+            color: #fff;
+        }
+
+        .hero p {
+            margin: 5px 0 12px 0;
+            color: #aaa;
+        }
+
+        .intro {
+            padding: 0 20px 10px 20px;
+            color: #bbb;
+            font-size: 0.95em;
+            line-height: 1.6;
+        }
+
+        .math-structure {
+            padding: 0 20px 10px 20px;
+            color: #aaa;
+            font-size: 0.9em;
+            line-height: 1.5;
         }
 
         .container {
@@ -19,7 +49,7 @@
             grid-template-columns: 1fr 300px 350px;
             gap: 20px;
             padding: 20px;
-            height: 100vh;
+            min-height: calc(100vh - 180px);
             box-sizing: border-box;
         }
 
@@ -69,11 +99,11 @@
         button#btnPerturb {
             background: #e24a4a;
         }
-        
+
         button#btnPerturb:hover {
             background: #bd3535;
         }
-        
+
         button#btnPerturb:active {
             background: #992929;
             transform: scale(0.98);
@@ -90,7 +120,8 @@
             border: 1px solid #333;
         }
 
-        h2, h3 {
+        h2,
+        h3 {
             margin-top: 0;
             color: #ddd;
             border-bottom: 1px solid #444;
@@ -103,6 +134,7 @@
             margin-bottom: 15px;
             border-left: 4px solid #4a90e2;
             font-size: 0.85em;
+            line-height: 1.5;
         }
 
         .eq-ref {
@@ -116,7 +148,29 @@
             margin-bottom: 5px;
         }
 
-        /* MathJaxが読み込まれるまでのチラつき防止 */
+        .small-note {
+            font-size: 0.85em;
+            color: #aaa;
+            margin-bottom: 10px;
+            line-height: 1.5;
+        }
+
+        .footer-links {
+            padding: 10px 20px 20px 20px;
+            color: #888;
+            font-size: 0.85em;
+            line-height: 1.7;
+        }
+
+        .footer-links a {
+            color: #4a90e2;
+            text-decoration: none;
+        }
+
+        .footer-links a:hover {
+            text-decoration: underline;
+        }
+
         .MathJax {
             font-size: 1.1em !important;
         }
@@ -138,28 +192,24 @@
 </head>
 
 <body>
-    <div style="padding:20px 20px 0 20px;">
-        <h1 style="margin:0; font-size:1.6em; color:#fff;">
-            CFD v14d Simulator
-        </h1>
-        <p style="margin:5px 0 15px 0; color:#aaa;">
-            A nonlinear PDE system that naturally generates hysteresis and delayed recovery via state-dependent feedback.
-        </p>
+    <div class="hero">
+        <h1>CFD v14d Simulator</h1>
+        <p>A nonlinear PDE system that naturally generates hysteresis and delayed recovery via state-dependent feedback.</p>
     </div>
 
-    <div style="padding:0 20px 10px 20px; color:#aaa; font-size:0.9em;">
-    <strong>Mathematical structure:</strong><br>
-    Nonlinear, non-autonomous reaction–diffusion–advection system with state-dependent feedback.
+    <div class="math-structure">
+        <strong>Mathematical structure:</strong><br>
+        Nonlinear, non-autonomous reaction–diffusion–advection system with state-dependent feedback.
     </div>
 
-    <div style="padding:0 20px 10px 20px; color:#bbb; font-size:0.95em;">
+    <div class="intro">
         <strong>What to observe:</strong><br>
         • Asymmetric transitions (hysteresis)<br>
         • Delayed recovery after collapse<br>
         • Phase-transition-like behavior<br><br>
 
         These emerge from a closed loop:<br>
-        <code>M → π_int → ρ → M</code>
+        <code>M → π<sub>int</sub> → ρ → M</code>
     </div>
 
     <div class="container">
@@ -172,9 +222,9 @@
 
         <div class="panel">
             <h2>Dynamic Hysteresis</h2>
-            
-            <div style="font-size:0.85em; color:#aaa; margin-bottom:10px;">
-                Collapse of M leads to loss of internal structure.  
+
+            <div class="small-note">
+                Collapse of $M$ leads to loss of internal structure.
                 Recovery is delayed because feedback disappears.
             </div>
 
@@ -186,7 +236,7 @@
                 <span style="color:rgba(255, 99, 132, 1)">$\pi_{int}$ (Metabolism)</span> |
                 <span style="color:rgba(74, 144, 226, 1)">$M$ (Total Info)</span>
             </div>
-            
+
             <div class="stats" style="color: #ff5555; text-align: center;">
                 Current $\pi_{int}$: <span id="pi_val">2.000</span>
             </div>
@@ -229,21 +279,31 @@
                 <strong>④ Flow velocity &amp; defensive viscosity</strong><br>
                 $$ \mathbf{v} = -\frac{B}{\gamma(G)}\nabla F, \quad \gamma(G) = \gamma_{min} + \frac{\gamma_{max}-\gamma_{min}}{1+e^{-a(G-G_{th})}} $$
             </div>
-            
+
             <div class="eq-box">
                 <span class="eq-ref">Eq.(5)</span>
                 <strong>⑤ Transformation resistance</strong><br>
-                $$ G[\rho,F] = k_G \int_0^{2\pi}\int_0^1 \rho F r dr d\theta $$
+                $$ G[\rho,F] = k_G \int_0^{2\pi}\int_0^1 \rho F r\,dr\,d\theta $$
             </div>
 
             <div class="eq-box">
                 <span class="eq-ref">Eq.(6)</span>
-                <strong>⑥ Dynamic Potential F (Erosion)</strong><br>
+                <strong>⑥ Dynamic Potential $F$ (Erosion)</strong><br>
                 $$ \frac{\tau_{base} R / (r+r_0)}{1+\rho/\rho_0} \frac{\partial F}{\partial t} = -(F-F_0) - \int W \rho \, d\beta' $$
             </div>
         </div>
     </div>
 
+    <div class="footer-links">
+        <strong style="color:#bbb;">Related theory</strong><br>
+        Short note:
+        <a href="./arvix.pdf" target="_blank">Minimal theoretical description (PDF)</a><br>
+        Background:
+        <a href="https://www.researchgate.net/publication/403823337_Continuous_Dynamics_and_Discontinuous_Freezing_in_a_Minimal_Field_Model" target="_blank">ResearchGate article</a><br>
+        DOI: 10.13140/RG.2.2.19996.04486
+    </div>
+
     <script type="module" src="./sim/app.js"></script>
 </body>
+
 </html>
